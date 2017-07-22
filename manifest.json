@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "Project Yolo",
+  "description": "This extension shows ayyy lmao",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icon64.png",
+    "default_popup": "popup.html",
+    "default_title": "Click hither child"
+  },
+  "permissions": [
+    "activeTab",
+    "https://ajax.googleapis.com/"
+  ]
+}
