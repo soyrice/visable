@@ -1,33 +1,34 @@
-<!DOCTYPE html>
-<!-- saved from url=(0080)https://developer.chrome.com/extensions/examples/tutorials/getstarted/popup.html -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Getting Started Extension's Popup</title>
-    <style>
-      body {
-        font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-        font-size: 100%;
-      }
-      #status {
-        /* avoid an excessively wide status text */
-        white-space: pre;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        max-width: 400px;
-      }
-    </style>
+<html>
+	
+	<head>
+		<!-- Stylesheets -->
+		<link rel="stylesheet" href="css/styles.css">
+		<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="css/fontawesome/css/font-awesome.min.css">
+		
+		<!-- Fonts -->
+		<link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
+		
+		<!-- JS Scripts -->
+		<script src="popup.js"></script>
+		<script src="jquery-3.2.1.min.js"></script>
+	</head>
 
-    <!--
-      - JavaScript and HTML must be in separate files: see our Content Security
-      - Policy documentation[1] for details and explanation.
-      -
-      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-     -->
-    <script src="popup.js"></script>
-  </head>
-  <body>
-    <div id="status"></div>
-    <img id="image-result" hidden="">
-  
+	<body>
+		<br>
+		<div class="container">
+		<div class="row">
+			<!--<iframe src="http://www.arcgis.com/home/webmap/viewer.html?useExisting=1" width="100%" height="100%" frameborder="0"></iframe> -->
+			<div class="col-md-4 text-center"> 
+				<button onclick="parsePage" type="button" class="btn btn-primary btn-circle btn-xl"><i class="fa fa-globe fa-lg" aria-hidden="true"></i></button>
+				<br>
+				<br>
+				<div id="pending"></div>
+			</div>
+			<div id="result"></div>
+		</div>
+		</div>
+	</body>
 
-
-</body></html>
+</html>
