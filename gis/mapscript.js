@@ -14,13 +14,15 @@ require([
 
     "dojo/json",
 
+    "esri/PopupTemplate",
+
 
     "dojo/domReady!"
 
-], function(Map, SceneView, MapView, Locate, Extent, Graphic, Point,  SimpleMarkerSymbol, GraphicsLayer, Locator, JSON) {
+], function(Map, SceneView, MapView, Locate, Extent, Graphic, Point,  SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate) {
 
 
-    var placesData = getPlacesData()
+    var places = getPlacesData()
 
     var map = new Map({
         basemap: "streets",
@@ -33,29 +35,11 @@ require([
         scale: 50000000
     });
 
-    // Add graphics layer
-    var graphicsLayer = new GraphicsLayer();
-    map.add(graphicsLayer)
-
-    // add places data to map
-    var places = placesData.places;
-
-    // Initialize a symbol
-    var markerSymbol = new SimpleMarkerSymbol({
-        style: "circle",
-        color: "blue",
-        outline: {
-            color: [ 255, 255, 225 ],
-            width: 3
-        }
-    });
-
-    addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
-
     addLocationButton()
 
 
-    getLocationOfPlaces(places)
+    locatePlacesAndAddToMap(places)
+
 
     function addLocationButton(){
 
@@ -69,11 +53,26 @@ require([
 
     }
 
-    function getLocationOfPlaces(places){
+    function locatePlacesAndAddToMap(places){
+
+
+        // Add graphics layer
+        var graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer)
+
+        // Initialize a symbol
+        var markerSymbol = new SimpleMarkerSymbol({
+            style: "circle",
+            color: "blue",
+            outline: {
+                color: [ 255, 255, 225 ],
+                width: 3
+            }
+        });
 
         // Create a locator task using the world geocoding service
         var locatorTask = new Locator({
-            url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+            url: "https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer"
         });
 
         var addresses = []
@@ -83,12 +82,38 @@ require([
 
             var address = {
                 "OBJECTID":i,
-                "Single Line Input":places[i].name
+                "singleLine":places[i]
             };
             addresses.push(address)
         }
-        locatorTask.addressesToLocations(addresses).then(function(response){
-            console.log(response)
+
+        var params = {
+            addresses: addresses
+        }
+
+        locatorTask.addressesToLocations(params).then(function(locations){
+
+            var places = []
+
+            console.log(locations)
+
+            locations.forEach(function(loc) {
+
+                console.log(loc);
+
+                var place = {
+                    name:loc.attributes.LongLabel,
+                    x:loc.location.x,
+                    y:loc.location.y,
+                    subregion:loc.attributes.Subregion
+                }
+                places.push(place)
+            });
+
+
+            addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol)
+
+
         }).otherwise(function (err) {
             console.log(response)
         })
@@ -99,7 +124,7 @@ require([
     function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol){
 
 
-        var minX = Number.MAX_VALUE, minY =  Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE;
+        var minX = Number.MAX_VALUE, minY =  Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
 
         // Add places to map
         for (var i = 0; i < places.length; i++) {
@@ -107,20 +132,25 @@ require([
             var place = places[i];
 
 
-            if(minX > place.x){
-                minX = place.x
+            var xCord = Math.round(place.x)
+            var yCord = Math.round(place.y)
+
+            if(minX > xCord){
+                minX = xCord
             }
 
-            if(maxX < place.x){
-                maxX = place.x
+            if(maxX < xCord){
+                maxX = xCord
+                console.log(xCord)
             }
 
-            if(minY > place.y){
-                minY = place.y
+            if(minY > yCord){
+                minY = yCord
+
             }
 
-            if(maxY < place.y){
-                maxY = place.y
+            if(maxY < yCord){
+                maxY = yCord
             }
 
             var placesPoint = new Point({
@@ -132,11 +162,29 @@ require([
 
             var pointGraphic = new Graphic({
                 geometry: placesPoint,
-                symbol: markerSymbol
+                symbol: markerSymbol,
+                attribute:{
+                    "name":place.name
+                }
             });
+            console.log(place.name);
+
+            pointGraphic.popupTemplate = {
+                title: place.name,
+                content:"{name}",
+                fieldInfos: [{
+                    fieldName: "name",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }]
+            };
 
             graphicsLayer.add(pointGraphic)
         }
+
+        console.log(minX, minY, maxX, maxY);
 
         var placesExtent= new Extent({
             xmin: minX,
@@ -145,7 +193,7 @@ require([
             ymax: maxY
         });
 
-        var mapPadding = 100;
+        var mapPadding = 50;
 
         sceneView.padding = {
             top: mapPadding,
@@ -165,10 +213,7 @@ require([
 
 function getPlacesData(){
 
-    return JSON.parse('{"places": ' +
-    '[{"name":"london","x":"45.2","y":"60.4"},' +
-    '{"name":"dubai","x":"45.2","y":"23.4"},' +
-    '{"name":"tokyo","x":"46.2","y":"30.3"}]}');
+    return ['Texas', 'New York' ,'Redlands', 'Alabama'];
 }
 
 
