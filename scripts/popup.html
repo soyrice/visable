@@ -13,6 +13,11 @@
 		<!-- JS Scripts -->
 		<script src="popup.js"></script>
 		<script src="jquery-3.2.1.min.js"></script>
+
+		<!-- Earth 3D -->
+		<script type='text/javascript' src='js/d3/d3.v3.min.js'></script>
+  		<script type='text/javascript' src='js/topojson/topojson.v1.min.js'></script>
+  		<script type='text/javascript' src='js/planetaryjs.min.js'></script>
 	</head>
 
 	<body>
@@ -21,9 +26,11 @@
 		<div class="row">
 			<!--<iframe src="http://www.arcgis.com/home/webmap/viewer.html?useExisting=1" width="100%" height="100%" frameborder="0"></iframe> -->
 			<div class="col-md-4 text-center"> 
-				<button onclick="parsePage" type="button" class="btn btn-primary btn-circle btn-xl"><i class="fa fa-globe fa-lg" aria-hidden="true"></i></button>
+				<!-- <button onclick="parsePage" type="button" class="btn btn-primary btn-circle btn-xl"><i class="fa fa-globe fa-lg" aria-hidden="true"></i></button>-->
+				<button onclick="parsePage" type="button" class="btn btn-primary btn-lg">Extract HTML!</button>
 				<br>
 				<br>
+				<canvas id='rotatingGlobe' width='400' height='400' style='width: 400px; height: 400px; cursor: move;'></canvas>
 				<div id="pending"></div>
 			</div>
 			<div id="result"></div>
