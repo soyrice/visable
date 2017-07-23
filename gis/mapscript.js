@@ -14,13 +14,18 @@ require([
 
     "dojo/json",
 
+    "esri/PopupTemplate",
+
+    "dojo/on",
+    "dojo/dom",
+    "dojo/dom-construct",
 
     "dojo/domReady!"
 
-], function(Map, SceneView, MapView, Locate, Extent, Graphic, Point,  SimpleMarkerSymbol, GraphicsLayer, Locator, JSON) {
+], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct) {
 
 
-    var placesData = getPlacesData()
+    var places = getPlacesData()
 
     var map = new Map({
         basemap: "streets",
@@ -33,31 +38,11 @@ require([
         scale: 50000000
     });
 
-    // Add graphics layer
-    var graphicsLayer = new GraphicsLayer();
-    map.add(graphicsLayer)
-
-    // add places data to map
-    var places = placesData.places;
-
-    // Initialize a symbol
-    var markerSymbol = new SimpleMarkerSymbol({
-        style: "circle",
-        color: "blue",
-        outline: {
-            color: [ 255, 255, 225 ],
-            width: 3
-        }
-    });
-
-    addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
-
-    addLocationButton()
+    addLocationButton();
+    locatePlacesAndAddToMap(places);
 
 
-    getLocationOfPlaces(places)
-
-    function addLocationButton(){
+    function addLocationButton() {
 
         var locateBtn = new Locate({
             view: sceneView
@@ -69,11 +54,26 @@ require([
 
     }
 
-    function getLocationOfPlaces(places){
+    function locatePlacesAndAddToMap(places) {
+
+
+        // Add graphics layer
+        var graphicsLayer = new GraphicsLayer();
+        map.add(graphicsLayer)
+
+        // Initialize a symbol
+        var markerSymbol = new SimpleMarkerSymbol({
+            style: "circle",
+            color: "blue",
+            outline: {
+                color: [255, 255, 225],
+                width: 3
+            }
+        });
 
         // Create a locator task using the world geocoding service
         var locatorTask = new Locator({
-            url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"
+            url: "https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer"
         });
 
         var addresses = []
@@ -82,24 +82,58 @@ require([
         for (var i = 0; i < places.length; i++) {
 
             var address = {
-                "OBJECTID":i,
-                "Single Line Input":places[i].name
+                "OBJECTID": i,
+                "singleLine": places[i]
             };
             addresses.push(address)
         }
-        locatorTask.addressesToLocations(addresses).then(function(response){
-            console.log(response)
+
+        var params = {
+            addresses: addresses
+        }
+
+        locatorTask.addressesToLocations(params).then(function (locations) {
+
+            var places = [];
+
+            console.log(locations);
+
+            locations.forEach(function (loc) {
+
+                console.log(loc);
+
+                var placePoint = new Point({
+                    x: loc.location.x,
+                    y: loc.location.y,
+                    z: 1010
+                });
+
+                var place = {
+                    name: loc.attributes.LongLabel,
+                    x: loc.location.x,
+                    y: loc.location.y,
+                    subregion: loc.attributes.Subregion,
+                    placePoint:placePoint
+
+                }
+                places.push(place)
+            });
+
+
+            addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
+            addListOfPlaces(places);
+
+
         }).otherwise(function (err) {
             console.log(response)
         })
     }
 
 
+    function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol) {
 
-    function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol){
 
-
-        var minX = Number.MAX_VALUE, minY =  Number.MAX_VALUE, maxX = Number.MIN_VALUE, maxY = Number.MIN_VALUE;
+        var minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
 
         // Add places to map
         for (var i = 0; i < places.length; i++) {
@@ -107,68 +141,119 @@ require([
             var place = places[i];
 
 
-            if(minX > place.x){
-                minX = place.x
+            var xCord = Math.round(place.x)
+            var yCord = Math.round(place.y)
+
+            if (minX > xCord) {
+                minX = xCord
             }
 
-            if(maxX < place.x){
-                maxX = place.x
+            if (maxX < xCord) {
+                maxX = xCord
+                console.log(xCord)
             }
 
-            if(minY > place.y){
-                minY = place.y
+            if (minY > yCord) {
+                minY = yCord
+
             }
 
-            if(maxY < place.y){
-                maxY = place.y
+            if (maxY < yCord) {
+                maxY = yCord
             }
-
-            var placesPoint = new Point({
-                x:place.x,
-                y:place.y,
-                z:1010
-            });
 
 
             var pointGraphic = new Graphic({
-                geometry: placesPoint,
-                symbol: markerSymbol
+                geometry: place.placePoint,
+                symbol: markerSymbol,
+                attribute: {
+                    "name": place.name
+                }
             });
+            console.log(place.name);
+
+            pointGraphic.popupTemplate = {
+                title: place.name,
+                content: "{name}",
+                fieldInfos: [{
+                    fieldName: "name",
+                    format: {
+                        digitSeparator: true,
+                        places: 0
+                    }
+                }]
+            };
 
             graphicsLayer.add(pointGraphic)
         }
 
-        var placesExtent= new Extent({
+        console.log(minX, minY, maxX, maxY);
+
+        var placesExtent = new Extent({
             xmin: minX,
             ymin: minY,
             xmax: maxX,
             ymax: maxY
         });
 
-        var mapPadding = 100;
+        var mapPadding = 50;
 
         sceneView.padding = {
             top: mapPadding,
-            left:mapPadding,
-            right:mapPadding,
-            bottom:mapPadding
+            left: mapPadding,
+            right: mapPadding,
+            bottom: mapPadding
         };
 
-        sceneView.then(function(){
+        sceneView.then(function () {
             sceneView.goTo(placesExtent);
+
         })
+
+    }
+
+    function addListOfPlaces(places) {
+
+        var domElement = "<ul id=\"places_list\">";
+
+        var i = 0;
+        places.forEach(function (place) {
+
+            var placesId = "places" + i;
+            domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
+            i++;
+        });
+        domElement += "</ul>"
+
+        console.log(domElement);
+
+        var listView = domConstruct.toDom(domElement);
+
+        sceneView.ui.add(listView, {
+            position: "bottom-right"
+        });
+
+        var k = 0;
+        places.forEach(function (place) {
+
+            on(dom.byId("places" + k), "click", function (evt) {
+
+                var place = places[evt.currentTarget.id.slice(-1)];
+                console.log(place);
+                sceneView.goTo(place.placePoint);
+            });
+            k++;
+        });
+
 
     }
 
 });
 
 
-function getPlacesData(){
+function getPlacesData() {
 
-    return JSON.parse('{"places": ' +
-    '[{"name":"london","x":"45.2","y":"60.4"},' +
-    '{"name":"dubai","x":"45.2","y":"23.4"},' +
-    '{"name":"tokyo","x":"46.2","y":"30.3"}]}');
+    return ['Texas', 'New York', 'Redlands', 'Alabama'];
 }
 
 
