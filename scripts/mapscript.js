@@ -222,7 +222,7 @@ require([
         var i = 0;
         places.forEach(function (place) {
 
-            var placesId = "places" + i;
+            var placesId = "places_" + i;
             domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
             i++;
         });
@@ -239,10 +239,9 @@ require([
         var k = 0;
         places.forEach(function (place) {
 
-            on(dom.byId("places" + k), "click", function (evt) {
+            on(dom.byId("places_" + k), "click", function (evt) {
 
-                var place = places[evt.currentTarget.id.slice(-1)];
-                console.log("Place:");
+                var place = places[evt.currentTarget.id.split('_')[1]];
                 console.log(place.name.split(',')[0]);
 
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
