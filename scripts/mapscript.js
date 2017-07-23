@@ -1,4 +1,4 @@
-function renderEsriMap()
+function renderEsriMap(placesData)
 {
 require([
     "esri/Map",
@@ -27,7 +27,8 @@ require([
 ], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct) {
 
 
-    var places = getPlacesData()
+    // var places = getPlacesData()
+    var places = placesData;
 
     var map = new Map({
         basemap: "streets",

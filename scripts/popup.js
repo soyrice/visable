@@ -82,10 +82,10 @@ function cleanOutput(response)
 
 	setTimeout(function() {
 		$("#pending").remove();
+        $("#esriTitle").append("<img src='science.jpg' alt='esri' height='50'/>");
 	}, 3000);
 
-	$("#esriTitle").append("<img src='science.jpg' alt='esri' height='20'");
-	renderEsriMap();
+	renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Fallujah']);
 	
 
 	// getPlacesData([]);
