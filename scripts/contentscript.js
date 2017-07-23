@@ -8,6 +8,8 @@ chrome.runtime.sendMessage({
 	source: response
 });
 
+
+// For web page to search for word
 chrome.runtime.onMessage.addListener(function(message, sender) {
     if (message.action == "searchForWord") {
     	window.find(message.source);

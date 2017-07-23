@@ -45,7 +45,7 @@ function onPopupLoad()
 
 			$.ajax(
 			{
-			  url         : "https://bweyjxenua.localtunnel.me/jsonItems",
+			  url         : "https://75eba785.ngrok.io/jsonItems",
 			  type        : "POST",
 			  data        : JSON.stringify({"Text" : pageContent}),
 			  contentType : 'application/json',
@@ -85,24 +85,23 @@ function cleanOutput(response)
         $("#esriTitle").append("<img src='science.jpg' alt='esri' height='50'/>");
 	}, 3000);
 
-	renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Fallujah']);
-	
+	//renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Fallujah', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
 
 	// getPlacesData([]);
 
-	// console.log(JSON.parse(response));
-	// responseJSON = JSON.parse(response);
-	// cleanArray = [];
+	console.log(JSON.parse(response));
+	responseJSON = JSON.parse(response);
+	cleanArray = [];
 
-	// for (var i = 0; i < responseJSON.length; i++)
-	// {
-	// 	if (responseJSON[i].Name.length > 2) 
-	// 		cleanArray.push(responseJSON[i].Name);
-	// }
+	for (var i = 0; i < responseJSON.length; i++)
+	{
+		if (responseJSON[i].Name.length > 2) 
+			cleanArray.push(responseJSON[i].Name);
+	}
 
 	// whereToPrintTo.innerText = cleanArray.toString();
 
-	// getPlacesData(cleanArray);
+	renderEsriMap(cleanArray);
 }
 
 function renderPlanet()

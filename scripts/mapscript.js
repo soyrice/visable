@@ -242,7 +242,16 @@ require([
             on(dom.byId("places" + k), "click", function (evt) {
 
                 var place = places[evt.currentTarget.id.slice(-1)];
-                console.log(place);
+                console.log("Place:");
+                console.log(place.name.split(',')[0]);
+
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+                     chrome.tabs.sendMessage(tabs[0].id, {
+                         action : "searchForWord",
+                         source : (place.name.split(',')[0])
+                     }, function(response) {}); 
+                 });
+
                 sceneView.goTo(place.placePoint);
             });
             k++;
