@@ -5,8 +5,11 @@ else
 
 chrome.runtime.sendMessage({
 	action: "getSource",
-	//source: document.body.innerText
 	source: response
 });
 
-//console.log(window.getSelection().toString());
+chrome.runtime.onMessage.addListener(function(message, sender) {
+    if (message.action == "searchForWord") {
+    	window.find(message.source);
+    }
+});

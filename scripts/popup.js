@@ -4,12 +4,53 @@ function onPopupLoad()
 
 	var result = document.querySelector("#result");
 
-	chrome.runtime.onMessage.addListener(function(request, sender) {
-	  if (request.action == "getSource") {
-	    result.innerText = request.source;
-	  }
+	$("#searcher").keypress(function() {
+		chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+    		chrome.tabs.sendMessage(tabs[0].id, {
+    			action: "searchForWord",
+    			source: $('#searcher').val()
+    		}, function(response) {}); 
+		});
 	});
 
+	// Communication with contentscript.js
+	chrome.runtime.onMessage.addListener(function(request, sender) {
+		if (request.action == "getSource") {
+			
+			// result.innerText = request.source;
+
+			var pageContent = (request.source).toString();
+			pageContent = pageContent.replace("\"", "");
+
+			$.ajax({
+			  url         : "https://fuprpayqzs.localtunnel.me/jsonItems",
+			  type        : "POST",
+			  data        : JSON.stringify({"Text" : pageContent}),
+			  contentType : 'application/json',
+			  success: function(response){
+			    console.log(response);
+			    result.innerText = response;
+			  },
+			  error: function (jqXHR, textStatus, errorThrown) {
+			  	console.log(jqXHR);
+			  	console.log(textStatus);
+			  	console.log(errorThrown);
+			  }
+			});
+
+			
+			// var xhr = new XMLHttpRequest();
+			// xhr.open("POST", "https://fuprpayqzs.localtunnel.me/jsonItems", true);
+			// xhr.onreadystatechange = function() {
+			//   if (xhr.readyState == 4) {
+			//     console.log(xhr.responseText);
+			//   }
+			// }
+			// xhr.send({"Text" : "Moscow"});
+		}
+	});
+
+	// Page actions
 	$(document).ready(function () {
 		$(".btn").on("click", function(event)
 		{
@@ -28,8 +69,8 @@ function onPopupLoad()
     				}
     			$("#pending").hide();
   				});
-				
-			}, 1000);
+
+  				}, 1000);
 		});
 	});
 }
@@ -37,7 +78,7 @@ function onPopupLoad()
 function renderPlanet()
 {
 	(function() {
-	  var globe = planetaryjs.planet();
+	  globe = planetaryjs.planet();
 	  // Load our custom `autorotate` plugin; see below.
 	  globe.loadPlugin(autorotate(25));
 	  // The `earth` plugin draws the oceans and the land; it's actually
@@ -73,7 +114,7 @@ function renderPlanet()
 	    }
 	  }));
 	  // Set up the globe's initial scale, offset, and rotation.
-	  globe.projection.scale(175).translate([195, 175]).rotate([30, -25, 0]);
+	  globe.projection.scale(175).translate([195, 175]).rotate([30, -20, 0]);
 
 	  // Every few hundred milliseconds, we'll draw another random ping.
 	  var colors = ['red', 'yellow', 'white', 'orange', 'green', 'cyan', 'pink'];

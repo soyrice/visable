@@ -11,5 +11,5 @@
     "default_title": "Click me!"
   },
 
-  "permissions": ["activeTab", "http://*/"]
+  "permissions": ["activeTab", "http://*/", "https://*/"]
 }

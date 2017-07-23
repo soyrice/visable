@@ -1,5 +1,5 @@
 html {
-	background-color: 'black';
+	/*background-color: 'black';*/
 }
 
 body {
@@ -10,8 +10,17 @@ body {
     background-attachment: fixed;
 }
 
+.showmatch {
+    background-color:yellow;   
+   	font-size:30px;
+}
+
+#searcher {
+	position:fixed; top:10px; right:10px;
+}
+
 #pending {
-	font-family: 'Lobster', cursive;
+	font-family: 'Rubik', sans-serif;
 	font-size: 24px;
 	color: white;
 }
