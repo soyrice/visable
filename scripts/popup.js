@@ -4,51 +4,14 @@ function onPopupLoad()
 
 	var result = document.querySelector("#result");
 
-	$("#searcher").keypress(function() {
-		chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-    		chrome.tabs.sendMessage(tabs[0].id, {
-    			action: "searchForWord",
-    			source: $('#searcher').val()
-    		}, function(response) {}); 
-		});
-	});
-
-	// Communication with contentscript.js
-	chrome.runtime.onMessage.addListener(function(request, sender) {
-		if (request.action == "getSource") {
-			
-			// result.innerText = request.source;
-
-			var pageContent = (request.source).toString();
-			pageContent = pageContent.replace("\"", "");
-
-			$.ajax({
-			  url         : "https://fuprpayqzs.localtunnel.me/jsonItems",
-			  type        : "POST",
-			  data        : JSON.stringify({"Text" : pageContent}),
-			  contentType : 'application/json',
-			  success: function(response){
-			    console.log(response);
-			    result.innerText = response;
-			  },
-			  error: function (jqXHR, textStatus, errorThrown) {
-			  	console.log(jqXHR);
-			  	console.log(textStatus);
-			  	console.log(errorThrown);
-			  }
-			});
-
-			
-			// var xhr = new XMLHttpRequest();
-			// xhr.open("POST", "https://fuprpayqzs.localtunnel.me/jsonItems", true);
-			// xhr.onreadystatechange = function() {
-			//   if (xhr.readyState == 4) {
-			//     console.log(xhr.responseText);
-			//   }
-			// }
-			// xhr.send({"Text" : "Moscow"});
-		}
-	});
+	// $("#searcher").keypress(function() {
+	// 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+ //    		chrome.tabs.sendMessage(tabs[0].id, {
+ //    			action: "searchForWord",
+ //    			source: $('#searcher').val()
+ //    		}, function(response) {}); 
+	// 	});
+	// });
 
 	// Page actions
 	$(document).ready(function () {
@@ -59,20 +22,67 @@ function onPopupLoad()
 			$("#rotatingGlobe").hide();
 
 			$("#pending").append("Injecting script...<br><i class='fa fa-cog fa-spin fa-3x' aria-hidden='true'></i>");
-				window.setTimeout(function (){
-				
-  				chrome.tabs.executeScript(null, {
-    				file: "contentscript.js"
-  				}, function(response) {
-  					if (chrome.runtime.lastError) {
-     					result.innerText = 'There was an error injecting script : \n' + chrome.runtime.lastError.message;
-    				}
-    			$("#pending").hide();
-  				});
 
-  				}, 1000);
+			chrome.tabs.executeScript(null, { file: "contentscript.js" }, function(response)
+			{
+				if (chrome.runtime.lastError)
+ 					result.innerText = 'There was an error injecting script : \n' + chrome.runtime.lastError.message;
+			}
+			
+			);
 		});
 	});
+
+	// Communication with contentscript.js
+	chrome.runtime.onMessage.addListener(function(request, sender)
+	{
+		if (request.action == "getSource")
+		{
+			// result.innerText = request.source;
+
+			var pageContent = (request.source).toString();
+			pageContent = pageContent.replace("\"", "");
+
+			$.ajax(
+			{
+			  url         : "https://gvifsgwfsw.localtunnel.me/jsonItems",
+			  type        : "POST",
+			  data        : JSON.stringify({"Text" : pageContent}),
+			  contentType : 'application/json',
+			  success: function(response)
+			  {
+			    console.log(response);
+			    // result.innerText = response;
+			    $("#pending").hide();
+			    cleanOutput(response, result);         // For Esri API
+			  }
+			  // error: function (jqXHR, textStatus, errorThrown) {
+			  // 	console.log(jqXHR);
+			  // 	console.log(textStatus);
+			  // 	console.log(errorThrown);
+			  // }
+			});
+		}
+	});
+}
+
+/*
+[{"Type": "City", "Name": "Jos"}, {"Type": "City", "Name": "Tandil"}, {"Type": "City", "Name": "Mendoza"}, {"Type": "City", "Name": "Santa Fe"}, {"Type": "City", "Name": "Buenos Aires"}, {"Type": "City", "Name": "Asia"}, {"Type": "City", "Name": "Pampa"}, {"Type": "Region", "Name": "AR"}, {"Type": "Region", "Name": "US"}, {"Type": "Region", "Name": "PH"}, {"Type": "Region", "Name": "CN"}, {"Type": "Region", "Name": "AQ"}, {"Type": "Region", "Name": "GL"}, {"Type": "Region", "Name": "PR"}, {"Type": "Region", "Name": "NG"}, {"Type": "Region", "Name": "UY"}, {"Type": "Region", "Name": "BB"}, {"Type": "Region", "Name": "CL"}, {"Type": "Region", "Name": "AN"}, {"Type": "Region", "Name": "JM"}, {"Type": "Region", "Name": "CU"}, {"Type": "Region", "Name": "NP"}, {"Type": "Region", "Name": "NL"}, {"Type": "Region", "Name": "MX"}, {"Type": "Region", "Name": "ES"}, {"Type": "Region", "Name": "DK"}]
+*/
+
+function cleanOutput(response, whereToPrintTo)
+{
+	// console.log(JSON.parse(response));
+	responseJSON = JSON.parse(response);
+	cleanArray = [];
+
+	for (var i = 0; i < responseJSON.length; i++)
+	{
+		if (responseJSON[i].Name.length > 2) 
+			cleanArray.push(responseJSON[i].Name);
+	}
+
+	whereToPrintTo.innerText = cleanArray.toString();
 }
 
 function renderPlanet()
