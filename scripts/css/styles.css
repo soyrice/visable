@@ -40,13 +40,13 @@ body {
 }
 
 #places_list {
-
     border: 1px solid #000000;
     background: #ffffff;
     line-height: 33px;
     padding-right: 10px;
     margin: 0px;
-
+    max-height: 99px;
+    overflow:auto;
 }
 
 #places_list li {
