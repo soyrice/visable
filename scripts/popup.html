@@ -1,6 +1,10 @@
 <html>
 	
 	<head>
+		
+		<!-- <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" /> -->
+		<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
+
 		<!-- Stylesheets -->
 		<link rel="stylesheet" href="css/styles.css">
 		<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -20,8 +24,16 @@
   		<script type='text/javascript' src='js/planetaryjs.min.js'></script>
 
   		<!-- Quicksearch -->
-		<script type='text/javascript' src='js/quicksearch/jquery.quicksearch.js'></script>  		
+		<script type='text/javascript' src='js/quicksearch/jquery.quicksearch.js'></script> 
 
+		<!-- Esri -->
+		<link rel="stylesheet" href="https://js.arcgis.com/4.4/esri/css/main.css"> 
+		<!-- <link rel="stylesheet" href="css/main.css"> -->
+		<script src="https://js.arcgis.com/4.4/"></script>
+		<!-- <script src="js/init.js"></script> -->
+    	<script src="mapscript.js"></script>
+
+    	<!-- <script src="js/require.js"></script> -->
 	</head>
 
 	<body>
@@ -39,6 +51,7 @@
 				<div id="pending"></div>
 			</div>
 			<div id="result"></div>
+			<div id="mapDiv"></div>
 		</div>
 		</div>
 	</body>

@@ -45,7 +45,7 @@ function onPopupLoad()
 
 			$.ajax(
 			{
-			  url         : "https://gvifsgwfsw.localtunnel.me/jsonItems",
+			  url         : "https://bweyjxenua.localtunnel.me/jsonItems",
 			  type        : "POST",
 			  data        : JSON.stringify({"Text" : pageContent}),
 			  contentType : 'application/json',
@@ -54,13 +54,14 @@ function onPopupLoad()
 			    console.log(response);
 			    // result.innerText = response;
 			    $("#pending").hide();
-			    cleanOutput(response, result);         // For Esri API
+			    cleanOutput(response, result);
+			  },
+			  error: function (jqXHR, textStatus, errorThrown) {
+			  	console.log(jqXHR);
+			  	console.log(textStatus);
+			  	console.log(errorThrown);
+			  	cleanOutput([], result);
 			  }
-			  // error: function (jqXHR, textStatus, errorThrown) {
-			  // 	console.log(jqXHR);
-			  // 	console.log(textStatus);
-			  // 	console.log(errorThrown);
-			  // }
 			});
 		}
 	});
@@ -72,17 +73,22 @@ function onPopupLoad()
 
 function cleanOutput(response, whereToPrintTo)
 {
+	console.log("Reached cleanOutput()");
+	getPlacesData([]);
+
 	// console.log(JSON.parse(response));
-	responseJSON = JSON.parse(response);
-	cleanArray = [];
+	// responseJSON = JSON.parse(response);
+	// cleanArray = [];
 
-	for (var i = 0; i < responseJSON.length; i++)
-	{
-		if (responseJSON[i].Name.length > 2) 
-			cleanArray.push(responseJSON[i].Name);
-	}
+	// for (var i = 0; i < responseJSON.length; i++)
+	// {
+	// 	if (responseJSON[i].Name.length > 2) 
+	// 		cleanArray.push(responseJSON[i].Name);
+	// }
 
-	whereToPrintTo.innerText = cleanArray.toString();
+	// whereToPrintTo.innerText = cleanArray.toString();
+
+	// getPlacesData(cleanArray);
 }
 
 function renderPlanet()

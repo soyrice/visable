@@ -1,3 +1,5 @@
+function renderEsriMap()
+{
 require([
     "esri/Map",
     "esri/views/SceneView",
@@ -244,19 +246,14 @@ require([
             });
             k++;
         });
-
-
     }
-
 });
-
-
-function getPlacesData() {
-
-    return ['Texas', 'New York', 'Redlands', 'Alabama'];
 }
 
+function getPlacesData(resultingArray)
+{
+    return ['Texas', 'New York', 'Redlands', 'Alabama'];
+    //return resultingArray;
+}
 
-
-
-
+window.onload = renderEsriMap;
