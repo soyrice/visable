@@ -16,10 +16,13 @@ require([
 
     "esri/PopupTemplate",
 
+    "dojo/on",
+    "dojo/dom",
+    "dojo/dom-construct",
 
     "dojo/domReady!"
 
-], function(Map, SceneView, MapView, Locate, Extent, Graphic, Point,  SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate) {
+], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct) {
 
 
     var places = getPlacesData()
@@ -35,13 +38,11 @@ require([
         scale: 50000000
     });
 
-    addLocationButton()
+    addLocationButton();
+    locatePlacesAndAddToMap(places);
 
 
-    locatePlacesAndAddToMap(places)
-
-
-    function addLocationButton(){
+    function addLocationButton() {
 
         var locateBtn = new Locate({
             view: sceneView
@@ -53,7 +54,7 @@ require([
 
     }
 
-    function locatePlacesAndAddToMap(places){
+    function locatePlacesAndAddToMap(places) {
 
 
         // Add graphics layer
@@ -65,7 +66,7 @@ require([
             style: "circle",
             color: "blue",
             outline: {
-                color: [ 255, 255, 225 ],
+                color: [255, 255, 225],
                 width: 3
             }
         });
@@ -81,8 +82,8 @@ require([
         for (var i = 0; i < places.length; i++) {
 
             var address = {
-                "OBJECTID":i,
-                "singleLine":places[i]
+                "OBJECTID": i,
+                "singleLine": places[i]
             };
             addresses.push(address)
         }
@@ -91,27 +92,36 @@ require([
             addresses: addresses
         }
 
-        locatorTask.addressesToLocations(params).then(function(locations){
+        locatorTask.addressesToLocations(params).then(function (locations) {
 
-            var places = []
+            var places = [];
 
-            console.log(locations)
+            console.log(locations);
 
-            locations.forEach(function(loc) {
+            locations.forEach(function (loc) {
 
                 console.log(loc);
 
+                var placePoint = new Point({
+                    x: loc.location.x,
+                    y: loc.location.y,
+                    z: 1010
+                });
+
                 var place = {
-                    name:loc.attributes.LongLabel,
-                    x:loc.location.x,
-                    y:loc.location.y,
-                    subregion:loc.attributes.Subregion
+                    name: loc.attributes.LongLabel,
+                    x: loc.location.x,
+                    y: loc.location.y,
+                    subregion: loc.attributes.Subregion,
+                    placePoint:placePoint
+
                 }
                 places.push(place)
             });
 
 
-            addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol)
+            addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
+            addListOfPlaces(places);
 
 
         }).otherwise(function (err) {
@@ -120,11 +130,10 @@ require([
     }
 
 
+    function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol) {
 
-    function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol){
 
-
-        var minX = Number.MAX_VALUE, minY =  Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
+        var minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
 
         // Add places to map
         for (var i = 0; i < places.length; i++) {
@@ -135,43 +144,37 @@ require([
             var xCord = Math.round(place.x)
             var yCord = Math.round(place.y)
 
-            if(minX > xCord){
+            if (minX > xCord) {
                 minX = xCord
             }
 
-            if(maxX < xCord){
+            if (maxX < xCord) {
                 maxX = xCord
                 console.log(xCord)
             }
 
-            if(minY > yCord){
+            if (minY > yCord) {
                 minY = yCord
 
             }
 
-            if(maxY < yCord){
+            if (maxY < yCord) {
                 maxY = yCord
             }
 
-            var placesPoint = new Point({
-                x:place.x,
-                y:place.y,
-                z:1010
-            });
-
 
             var pointGraphic = new Graphic({
-                geometry: placesPoint,
+                geometry: place.placePoint,
                 symbol: markerSymbol,
-                attribute:{
-                    "name":place.name
+                attribute: {
+                    "name": place.name
                 }
             });
             console.log(place.name);
 
             pointGraphic.popupTemplate = {
                 title: place.name,
-                content:"{name}",
+                content: "{name}",
                 fieldInfos: [{
                     fieldName: "name",
                     format: {
@@ -186,7 +189,7 @@ require([
 
         console.log(minX, minY, maxX, maxY);
 
-        var placesExtent= new Extent({
+        var placesExtent = new Extent({
             xmin: minX,
             ymin: minY,
             xmax: maxX,
@@ -197,23 +200,60 @@ require([
 
         sceneView.padding = {
             top: mapPadding,
-            left:mapPadding,
-            right:mapPadding,
-            bottom:mapPadding
+            left: mapPadding,
+            right: mapPadding,
+            bottom: mapPadding
         };
 
-        sceneView.then(function(){
+        sceneView.then(function () {
             sceneView.goTo(placesExtent);
+
         })
+
+    }
+
+    function addListOfPlaces(places) {
+
+        var domElement = "<ul id=\"places_list\">";
+
+        var i = 0;
+        places.forEach(function (place) {
+
+            var placesId = "places" + i;
+            domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
+            i++;
+        });
+        domElement += "</ul>"
+
+        console.log(domElement);
+
+        var listView = domConstruct.toDom(domElement);
+
+        sceneView.ui.add(listView, {
+            position: "bottom-right"
+        });
+
+        var k = 0;
+        places.forEach(function (place) {
+
+            on(dom.byId("places" + k), "click", function (evt) {
+
+                var place = places[evt.currentTarget.id.slice(-1)];
+                console.log(place);
+                sceneView.goTo(place.placePoint);
+            });
+            k++;
+        });
+
 
     }
 
 });
 
 
-function getPlacesData(){
+function getPlacesData() {
 
-    return ['Texas', 'New York' ,'Redlands', 'Alabama'];
+    return ['Texas', 'New York', 'Redlands', 'Alabama'];
 }
 
 
