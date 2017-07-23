@@ -12,8 +12,12 @@ body {
     */
 }
 
+#topBuffer {
+    margin-top: 50px;
+}
+
 .showmatch {
-    background-color:yellow;   
+    background-color:yellow;
    	font-size:30px;
 }
 
@@ -46,7 +50,9 @@ body {
     padding-right: 10px;
     margin: 0px;
     max-height: 99px;
+    max-width: 250px;
     overflow:auto;
+    opacity:0.8;
 }
 
 #places_list li {
