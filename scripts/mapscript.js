@@ -256,4 +256,4 @@ function getPlacesData(resultingArray)
     //return resultingArray;
 }
 
-window.onload = renderEsriMap;
+// window.onload = renderEsriMap;

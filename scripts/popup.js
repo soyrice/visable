@@ -2,7 +2,7 @@ function onPopupLoad()
 {
 	renderPlanet();
 
-	var result = document.querySelector("#result");
+	// var result = document.querySelector("#result");
 
 	// $("#searcher").keypress(function() {
 	// 	chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
@@ -14,24 +14,24 @@ function onPopupLoad()
 	// });
 
 	// Page actions
-	$(document).ready(function () {
-		$(".btn").on("click", function(event)
-		{
-			event.preventDefault();
-			$(".btn").hide();
-			$("#rotatingGlobe").hide();
+	// $(document).ready(function () {
+	// 	$(".btn").on("click", function(event)
+	// 	{
+	// 		event.preventDefault();
+	// 		$(".btn").hide();
+	// 		$("#rotatingGlobe").hide();
 
-			$("#pending").append("Injecting script...<br><i class='fa fa-cog fa-spin fa-3x' aria-hidden='true'></i>");
+	// 		$("#pending").append("Injecting script...<br><i class='fa fa-cog fa-spin fa-3x' aria-hidden='true'></i>");
 
-			chrome.tabs.executeScript(null, { file: "contentscript.js" }, function(response)
-			{
-				if (chrome.runtime.lastError)
- 					result.innerText = 'There was an error injecting script : \n' + chrome.runtime.lastError.message;
-			}
+	// 		chrome.tabs.executeScript(null, { file: "contentscript.js" }, function(response)
+	// 		{
+	// 			if (chrome.runtime.lastError)
+ // 					result.innerText = 'There was an error injecting script : \n' + chrome.runtime.lastError.message;
+	// 		}
 			
-			);
-		});
-	});
+	// 		);
+	// 	});
+	// });
 
 	// Communication with contentscript.js
 	chrome.runtime.onMessage.addListener(function(request, sender)
@@ -52,18 +52,23 @@ function onPopupLoad()
 			  success: function(response)
 			  {
 			    console.log(response);
-			    // result.innerText = response;
-			    $("#pending").hide();
-			    cleanOutput(response, result);
+			    // $("#pending").hide();
+			    cleanOutput(response);
 			  },
 			  error: function (jqXHR, textStatus, errorThrown) {
 			  	console.log(jqXHR);
 			  	console.log(textStatus);
 			  	console.log(errorThrown);
-			  	cleanOutput([], result);
+			  	cleanOutput([]);
 			  }
 			});
 		}
+	});
+
+	chrome.tabs.executeScript(null, { file: "contentscript.js" }, function(response)
+	{
+		if (chrome.runtime.lastError)
+ 			console.log(chrome.runtime.lastError.message);
 	});
 }
 
@@ -71,10 +76,19 @@ function onPopupLoad()
 [{"Type": "City", "Name": "Jos"}, {"Type": "City", "Name": "Tandil"}, {"Type": "City", "Name": "Mendoza"}, {"Type": "City", "Name": "Santa Fe"}, {"Type": "City", "Name": "Buenos Aires"}, {"Type": "City", "Name": "Asia"}, {"Type": "City", "Name": "Pampa"}, {"Type": "Region", "Name": "AR"}, {"Type": "Region", "Name": "US"}, {"Type": "Region", "Name": "PH"}, {"Type": "Region", "Name": "CN"}, {"Type": "Region", "Name": "AQ"}, {"Type": "Region", "Name": "GL"}, {"Type": "Region", "Name": "PR"}, {"Type": "Region", "Name": "NG"}, {"Type": "Region", "Name": "UY"}, {"Type": "Region", "Name": "BB"}, {"Type": "Region", "Name": "CL"}, {"Type": "Region", "Name": "AN"}, {"Type": "Region", "Name": "JM"}, {"Type": "Region", "Name": "CU"}, {"Type": "Region", "Name": "NP"}, {"Type": "Region", "Name": "NL"}, {"Type": "Region", "Name": "MX"}, {"Type": "Region", "Name": "ES"}, {"Type": "Region", "Name": "DK"}]
 */
 
-function cleanOutput(response, whereToPrintTo)
+function cleanOutput(response)
 {
 	console.log("Reached cleanOutput()");
-	getPlacesData([]);
+
+	setTimeout(function() {
+		$("#pending").remove();
+	}, 3000);
+
+	$("#esriTitle").append("<img src='science.jpg' alt='esri' height='20'");
+	renderEsriMap();
+	
+
+	// getPlacesData([]);
 
 	// console.log(JSON.parse(response));
 	// responseJSON = JSON.parse(response);
@@ -210,7 +224,7 @@ function renderPlanet()
 	    };
 	  };
 	})();
-
 }
+
 
 window.onload = onPopupLoad;

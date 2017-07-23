@@ -5,9 +5,11 @@ html {
 body {
 	width: 700;
 	height: 500;
+	/*
 	background-image: url('../background.png');
 	background-repeat: no-repeat;
     background-attachment: fixed;
+    */
 }
 
 .showmatch {
@@ -20,9 +22,10 @@ body {
 }
 
 #pending {
+	padding-top: 70px;
 	font-family: 'Rubik', sans-serif;
-	font-size: 24px;
-	color: white;
+	font-size: 30px;
+	color: black;
 }
 
 #result {
@@ -53,6 +56,6 @@ body {
 #mapDiv {
     padding: 0;
     margin: 0;
-    height: 100%;
+    /*height: 100%;*/
     width: 100%;
 }
