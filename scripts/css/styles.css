@@ -12,17 +12,14 @@ body {
     */
 }
 
-#topBuffer {
-    margin-top: 50px;
+#myButton {
+    margin-top: 15px;
+    position: relative;
 }
 
 .showmatch {
     background-color:yellow;
    	font-size:30px;
-}
-
-#searcher {
-	position:fixed; top:10px; right:10px;
 }
 
 #pending {
@@ -50,9 +47,10 @@ body {
     padding-right: 10px;
     margin: 0px;
     max-height: 99px;
-    max-width: 250px;
+    max-width: 200px;
     overflow:auto;
     opacity:0.8;
+    -webkit-padding-start: 15px;
 }
 
 #places_list li {

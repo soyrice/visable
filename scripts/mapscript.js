@@ -238,17 +238,18 @@ function renderEsriMap(placesData) {
 
                 on(dom.byId("places_" + k), "click", function (evt) {
 
-                    var place = places[evt.currentTarget.id.split('_')[1]];
-                    console.log(place.name.split(',')[0]);
+                    places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
 
-                    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, {
-                            action: "searchForWord",
-                            source: (place.name.split(',')[0])
-                        }, function (response) {
-                        });
+                    console.log("Places, ", places);
+
+                    var i = 0;
+                    places.forEach(function (place) {
+
+                        var placesId = "places_" + i;
+                        domElement += "<li id=\"" + placesId + "\">&bull; " + place.name + "</li>";
+                        i++;
                     });
-
+                    domElement += "</ul>"
                     sceneView.goTo(place.placePoint);
                 });
                 k++;
