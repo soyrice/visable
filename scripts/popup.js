@@ -1,5 +1,9 @@
+mostFrequent = "test";
+
 function onPopupLoad()
 {
+
+    $(".btn").hide();
 	renderPlanet();
 
 	// var result = document.querySelector("#result");
@@ -80,10 +84,10 @@ function cleanOutput(response)
 {
 	console.log("Reached cleanOutput()");
 
-	setTimeout(function() {
-		$("#pending").remove();
-        $("#esriTitle").append("<img src='science.jpg' alt='esri' height='50'/>");
-	}, 3000);
+	// setTimeout(function()
+    // {
+        
+	// }, 1000);
 
 	//renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Fallujah', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
 
@@ -93,13 +97,35 @@ function cleanOutput(response)
 	responseJSON = JSON.parse(response);
 	cleanArray = [];
 
+    mostFrequentCount = 0;
 	for (var i = 0; i < responseJSON.length; i++)
 	{
 		if (responseJSON[i].Name.length > 2) 
+        {
 			cleanArray.push(responseJSON[i].Name);
+
+            if(responseJSON[i].Count > mostFrequentCount) {
+                mostFrequentCount = responseJSON[i].Count;
+                mostFrequent = responseJSON[i].Name;
+            }
+        }
 	}
 
+    $("#pending").remove();
+    $(".btn").show();
+
 	// whereToPrintTo.innerText = cleanArray.toString();
+
+    $("#esriTitle").append("<img src='science.jpg' alt='esri' height='50'/>");
+
+    $(".btn").on("click", function(event)
+     {
+         event.preventDefault();
+         $(".btn").hide();
+         $("#mapDiv").remove();
+
+         $("#myPage").append("<iframe src='http://www.arcgis.com/home/search.html?q=" + mostFrequent + "&t=content&start=1&sortOrder=desc&sortField=relevance' width='100%'' height='100%'' frameborder='0'></iframe>");
+     });
 
 	renderEsriMap(cleanArray);
 }

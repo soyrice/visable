@@ -12,6 +12,6 @@ chrome.runtime.sendMessage({
 // For web page to search for word
 chrome.runtime.onMessage.addListener(function(message, sender) {
     if (message.action == "searchForWord") {
-    	window.find(message.source);
+    	window.find(message.source, false, false, true, false);
     }
 });
