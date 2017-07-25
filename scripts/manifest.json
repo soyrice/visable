@@ -11,7 +11,7 @@
     "default_title": "Click me!"
   },
 
-  "permissions": ["activeTab", "http://*/", "https://*/"],
+  "permissions": ["geolocation", "activeTab", "http://*/", "https://*/"],
 
   "content_security_policy": "script-src 'self' 'unsafe-eval' https://js.arcgis.com; object-src 'self'"
 }

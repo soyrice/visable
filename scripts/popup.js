@@ -1,9 +1,17 @@
-mostFrequent = "test";
+mostFrequent = "Chicago";
 
 function onPopupLoad()
 {
+    var numDots = 0;
+    var intervalID = setInterval(function() {
+        $("#pending").append(".");
+        numDots++;
+        if (numDots >= 7)
+            clearInterval(intervalID);
+    }, 1000);
 
     $(".btn").hide();
+    $("#fullScreen").hide();
 	renderPlanet();
 
 	// var result = document.querySelector("#result");
@@ -37,7 +45,7 @@ function onPopupLoad()
 	// 	});
 	// });
 
-	// Communication with contentscript.js
+	// Listener for communication with contentscript.js
 	chrome.runtime.onMessage.addListener(function(request, sender)
 	{
 		if (request.action == "getSource")
@@ -55,15 +63,15 @@ function onPopupLoad()
 			  contentType : 'application/json',
 			  success: function(response)
 			  {
-			    console.log(response);
+			    console.log("Ajax success: ", response);
 			    // $("#pending").hide();
 			    cleanOutput(response);
 			  },
 			  error: function (jqXHR, textStatus, errorThrown) {
-			  	console.log(jqXHR);
-			  	console.log(textStatus);
-			  	console.log(errorThrown);
-			  	cleanOutput([]);
+                console.log("Ajax error: ", jqXHR, textStatus, errorThrown);
+                mostFrequent = "Seattle";
+                changeMapInterfaceElements();
+			  	renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Iran', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
 			  }
 			});
 		}
@@ -71,8 +79,9 @@ function onPopupLoad()
 
 	chrome.tabs.executeScript(null, { file: "contentscript.js" }, function(response)
 	{
-		if (chrome.runtime.lastError)
- 			console.log(chrome.runtime.lastError.message);
+		if (chrome.runtime.lastError) {
+ 			console.log("Chrome runtime error: ", chrome.runtime.lastError.message);
+        }
 	});
 }
 
@@ -82,18 +91,6 @@ function onPopupLoad()
 
 function cleanOutput(response)
 {
-	console.log("Reached cleanOutput()");
-
-	// setTimeout(function()
-    // {
-        
-	// }, 1000);
-
-	//renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Fallujah', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
-
-	// getPlacesData([]);
-
-	console.log(JSON.parse(response));
 	responseJSON = JSON.parse(response);
 	cleanArray = [];
 
@@ -111,10 +108,21 @@ function cleanOutput(response)
         }
 	}
 
-    $("#pending").remove();
-    $(".btn").show();
+    changeMapInterfaceElements();
 
-	// whereToPrintTo.innerText = cleanArray.toString();
+    // Uncomment if server is down for sample data
+	renderEsriMap(cleanArray);
+}
+
+function changeMapInterfaceElements()
+{
+    $("#pending").remove();
+    $("#rotatingGlobe").remove();
+    $("#row1").remove();
+    $(".btn").show();
+    $("#fullScreen").show();
+
+    // whereToPrintTo.innerText = cleanArray.toString();
 
     $("#esriTitle").append("<img src='science.jpg' alt='esri' height='50'/>");
 
@@ -127,9 +135,13 @@ function cleanOutput(response)
          $("#myPage").append("<iframe src='http://www.arcgis.com/home/search.html?q=" + mostFrequent + "&t=content&start=1&sortOrder=desc&sortField=relevance' width='100%'' height='100%'' frameborder='0'></iframe>");
      });
 
-	renderEsriMap(cleanArray);
+    $("#fullScreen").on("click", function(event)
+    {
+        chrome.windows.update({ state: "fullscreen" });
+    });
 }
 
+// Loading icon
 function renderPlanet()
 {
 	(function() {
@@ -250,6 +262,5 @@ function renderPlanet()
 	  };
 	})();
 }
-
 
 window.onload = onPopupLoad;
