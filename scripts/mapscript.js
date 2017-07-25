@@ -120,9 +120,10 @@ function renderEsriMap(placesData) {
                         x: loc.location.x,
                         y: loc.location.y,
                         subregion: loc.attributes.Subregion,
-                        placePoint: placePoint
+                        placePoint: placePoint,
+                        country:loc.attributes.Country
+                    };
 
-                    }
                     places.push(place)
                 });
 
@@ -223,7 +224,7 @@ function renderEsriMap(placesData) {
                 domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
                 i++;
             });
-            domElement += "</ul>"
+            domElement += "</ul>";
 
             var listView = domConstruct.toDom(domElement);
 
@@ -256,16 +257,22 @@ function renderEsriMap(placesData) {
 
         function getGeoEnrichmentData(place) {
 
-            if(place == null){
-                return 'No data found'
+            if(place == null || place.country !='USA'){
+                return '';
             }
 
             var studyAreas = [];
 
             var studyArea = {
-                address: {
-                    text:place.name
-                }
+                geometry: {
+                    x:place.x,
+                    y:place.y
+                },
+                areaType:"StandardGeography",
+                intersectingGeographies:[
+                    {"sourceCountry":"US","layer":"US.Places"},
+                    {"sourceCountry":"US","layer":"US.States"},
+                ]
             };
 
             studyAreas.push(studyArea);
@@ -278,11 +285,8 @@ function renderEsriMap(placesData) {
             var queryObject = {
                 studyAreas: studyAreasJson,
                 token: TEMP_TOKEN,
-                f: 'pjson',
-                dataCollections:'["KeyGlobalFacts"]'
+                f: 'pjson'
             };
-
-            var totalPopulation ='No population found'
 
             return request(GEO_ENRICHMENT_URL, {
                 query: queryObject, headers: {
@@ -290,22 +294,24 @@ function renderEsriMap(placesData) {
                 }
             }).then(function (data) {
 
+                var totalPopulation =''
                 try {
-                    var parsedData = JSON.parse(data)
-                    totalPopulation = parsedData.results[0].value.FeatureSet[0].features[0].attributes.TOTPOP
+                    var parsedData = JSON.parse(data);
+                    console.log(parsedData);
+                    var attributes = parsedData.results[0].value.FeatureSet[0].features[0].attributes;
+                    totalPopulation = attributes.TOTPOP + " people live in " + attributes.StdGeographyName;
                 }
                 catch(err) {
                     console.log(err.message);
                 }
-                console.log(totalPopulation);
-                return 'Total population:' + totalPopulation;
+                return  totalPopulation;
 
             }, function (err) {
                 console.log(err);
-                return err.message;
+                return '';
 
             }, function (evt) {
-                return evt;
+                return '';
             });
 
         }
@@ -315,6 +321,6 @@ function renderEsriMap(placesData) {
 }
 
 function getPlacesData() {
-    return ['Texas', 'New York', 'Redlands', 'Dubai'];
+    return ['Calfornia', 'New York', 'Redlands', 'Atlanta', 'Hawai'];
 }
 //renderEsriMap(getPlacesData());
