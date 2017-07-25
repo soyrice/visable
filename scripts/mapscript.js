@@ -219,11 +219,14 @@ require([
 
         var domElement = "<ul id=\"places_list\">";
 
+        places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
+        console.log("Places, ", places);
+
         var i = 0;
         places.forEach(function (place) {
 
             var placesId = "places_" + i;
-            domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
+            domElement += "<li id=\"" + placesId + "\">&bull; " + place.name + "</li>";
             i++;
         });
         domElement += "</ul>"

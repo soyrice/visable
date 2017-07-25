@@ -71,7 +71,7 @@ function onPopupLoad()
                 console.log("Ajax error: ", jqXHR, textStatus, errorThrown);
                 mostFrequent = "Seattle";
                 changeMapInterfaceElements();
-			  	renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Iran', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
+			  	renderEsriMap(['Seattle', 'Miami', 'Chicago', 'Moscow', 'Tahiti', 'Hawaii', 'Fiji', 'Bulgaria', 'India', 'Belgium', 'France', 'Brussels', 'Madrid']);
 			  }
 			});
 		}
@@ -92,7 +92,8 @@ function onPopupLoad()
 function cleanOutput(response)
 {
 	responseJSON = JSON.parse(response);
-	cleanArray = [];
+	cleanArray   = [];
+    countryCodes = [];
 
     mostFrequentCount = 0;
 	for (var i = 0; i < responseJSON.length; i++)
@@ -106,11 +107,14 @@ function cleanOutput(response)
                 mostFrequent = responseJSON[i].Name;
             }
         }
+        else {
+            countryCodes.push(responseJSON[i].Name);
+        }
 	}
 
     changeMapInterfaceElements();
 
-    // Uncomment if server is down for sample data
+    // Add country codes
 	renderEsriMap(cleanArray);
 }
 
@@ -134,11 +138,6 @@ function changeMapInterfaceElements()
 
          $("#myPage").append("<iframe src='http://www.arcgis.com/home/search.html?q=" + mostFrequent + "&t=content&start=1&sortOrder=desc&sortField=relevance' width='100%'' height='100%'' frameborder='0'></iframe>");
      });
-
-    $("#fullScreen").on("click", function(event)
-    {
-        chrome.windows.update({ state: "fullscreen" });
-    });
 }
 
 // Loading icon

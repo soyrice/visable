@@ -50,6 +50,7 @@ body {
     max-width: 200px;
     overflow:auto;
     opacity:0.8;
+    -webkit-padding-start: 15px;
 }
 
 #places_list li {
