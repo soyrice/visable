@@ -1,4 +1,4 @@
-function renderEsriMap() {
+function renderEsriMap(placesData) {
     require([
         "esri/Map",
         "esri/views/SceneView",
@@ -26,9 +26,13 @@ function renderEsriMap() {
 
     ], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct, request) {
 
+        var GEO_ENRICHMENT_URL = 'http://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich';
+        var LOCATOR_TASK = 'https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer';
+        var TEMP_TOKEN = 'u_7Ga6wk_5Yxx9CW639yf1awRxJWibOD5AjyCuYG0TgqEYmVDOrz3WEfb-x03tDAmFNXOSkp3Pt1MYNtZHdfdJW_sX3UpaRaY99PpgUN7jTBzcjQCzkj-sF5SaFiEkymDj-jf46tf37ooPUU97yJIQ..';
 
-        var places = getPlacesData()
-        //var places = placesData;
+
+        //var places = getPlacesData()
+        var places = placesData;
 
         var map = new Map({
             basemap: "streets",
@@ -76,7 +80,7 @@ function renderEsriMap() {
 
             // Create a locator task using the world geocoding service
             var locatorTask = new Locator({
-                url: "https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer"
+                url: LOCATOR_TASK
             });
 
             var addresses = []
@@ -124,7 +128,6 @@ function renderEsriMap() {
 
 
                 addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
-                getGeoEnrichmentData(places);
                 addListOfPlaces(places);
 
 
@@ -178,14 +181,7 @@ function renderEsriMap() {
 
                 pointGraphic.popupTemplate = {
                     title: place.name,
-                    content: "{name}",
-                    fieldInfos: [{
-                        fieldName: "name",
-                        format: {
-                            digitSeparator: true,
-                            places: 0
-                        }
-                    }]
+                    content: getGeoEnrichmentData(place)
                 };
 
                 graphicsLayer.add(pointGraphic)
@@ -259,32 +255,63 @@ function renderEsriMap() {
             });
         }
 
-        function getGeoEnrichmentData(places) {
+        function getGeoEnrichmentData(place) {
+
+            if(place == null){
+                return 'No data found'
+            }
 
             var studyAreas = [];
-            var place = places[0];
-            var x = Math.round(place.x * 100) / 100;
-            var y = Math.round(place.x * 100) / 100;
 
-            var geometry = {
-                geometry: {x: x, y: y}
+            var studyArea = {
+                address: {
+                    text:place.name
+                }
             };
 
-            studyAreas.push(geometry);
+            studyAreas.push(studyArea);
 
             var studyAreasJson = JSON.stringify(studyAreas);
             console.log(studyAreasJson);
 
-            var url = 'http://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/?f=pjson';
-
             dojo.config.xRequestedWith = "";
 
-            request(url, {query: "studyareas=" + studyAreasJson ,  headers: {"X-Requested-With": null}}).then(function (data) {
-                console.log(data);
+            var queryObject = {
+                studyAreas: studyAreasJson,
+                token: TEMP_TOKEN,
+                f: 'pjson',
+                dataCollections:'["KeyGlobalFacts"]'
+            };
+
+            console.log(queryObject);
+
+            var totalPopulation ='No population found'
+
+            return request(GEO_ENRICHMENT_URL, {
+                query: queryObject, headers: {
+                    "X-Requested-With": null
+                }
+            }).then(function (data) {
+
+                console.log(data)
+
+
+                try {
+                    var parsedData = JSON.parse(data)
+                    totalPopulation = parsedData.results[0].value.FeatureSet[0].features[0].attributes.TOTPOP
+                }
+                catch(err) {
+                    console.log(err.message);
+                }
+                console.log(totalPopulation);
+                return 'Total population:' + totalPopulation;
+
             }, function (err) {
                 console.log(err);
+                return err.message;
+
             }, function (evt) {
-                console.log(evt);
+                return evt;
             });
 
         }
@@ -293,8 +320,7 @@ function renderEsriMap() {
     });
 }
 
-function getPlacesData(resultingArray) {
-    return ['Texas', 'New York', 'Redlands', 'Alabama'];
-    //return resultingArray;
+function getPlacesData() {
+    return ['Texas', 'New York', 'Redlands', 'Dubai'];
 }
-renderEsriMap();
+//renderEsriMap(getPlacesData());
