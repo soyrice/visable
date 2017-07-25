@@ -225,8 +225,6 @@ function renderEsriMap(placesData) {
             });
             domElement += "</ul>"
 
-            console.log(domElement);
-
             var listView = domConstruct.toDom(domElement);
 
             sceneView.ui.add(listView, {
@@ -284,8 +282,6 @@ function renderEsriMap(placesData) {
                 dataCollections:'["KeyGlobalFacts"]'
             };
 
-            console.log(queryObject);
-
             var totalPopulation ='No population found'
 
             return request(GEO_ENRICHMENT_URL, {
@@ -293,9 +289,6 @@ function renderEsriMap(placesData) {
                     "X-Requested-With": null
                 }
             }).then(function (data) {
-
-                console.log(data)
-
 
                 try {
                     var parsedData = JSON.parse(data)
