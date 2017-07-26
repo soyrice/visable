@@ -1,271 +1,326 @@
-function renderEsriMap(placesData)
-{
-require([
-    "esri/Map",
-    "esri/views/SceneView",
-    "esri/views/MapView",
-    "esri/widgets/Locate",
-    "esri/geometry/Extent",
+function renderEsriMap(placesData) {
+    require([
+        "esri/Map",
+        "esri/views/SceneView",
+        "esri/views/MapView",
+        "esri/widgets/Locate",
+        "esri/geometry/Extent",
 
-    "esri/Graphic",
-    "esri/geometry/Point",
-    "esri/symbols/SimpleMarkerSymbol",
-    "esri/layers/GraphicsLayer",
+        "esri/Graphic",
+        "esri/geometry/Point",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/layers/GraphicsLayer",
 
-    "esri/tasks/Locator",
+        "esri/tasks/Locator",
 
-    "dojo/json",
+        "dojo/json",
 
-    "esri/PopupTemplate",
+        "esri/PopupTemplate",
 
-    "dojo/on",
-    "dojo/dom",
-    "dojo/dom-construct",
+        "dojo/on",
+        "dojo/dom",
+        "dojo/dom-construct",
+        "dojo/request",
 
-    "dojo/domReady!"
+        "dojo/domReady!"
 
-], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct) {
+    ], function (Map, SceneView, MapView, Locate, Extent, Graphic, Point, SimpleMarkerSymbol, GraphicsLayer, Locator, JSON, PopupTemplate, on, dom, domConstruct, request) {
 
-
-    // var places = getPlacesData()
-    var places = placesData;
-
-    var map = new Map({
-        basemap: "streets",
-        ground: "world-elevation"
-    });
-
-    var sceneView = new SceneView({
-        container: "mapDiv",
-        map: map,
-        scale: 50000000
-    });
-
-    addLocationButton();
-    locatePlacesAndAddToMap(places);
+        var GEO_ENRICHMENT_URL = 'http://geoenrich.arcgis.com/arcgis/rest/services/World/geoenrichmentserver/GeoEnrichment/enrich';
+        var LOCATOR_TASK = 'https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer';
+        var TEMP_TOKEN = 'u_7Ga6wk_5Yxx9CW639yf1awRxJWibOD5AjyCuYG0TgqEYmVDOrz3WEfb-x03tDAmFNXOSkp3Pt1MYNtZHdfdJW_sX3UpaRaY99PpgUN7jTBzcjQCzkj-sF5SaFiEkymDj-jf46tf37ooPUU97yJIQ..';
 
 
-    function addLocationButton() {
+        //var places = getPlacesData()
+        var places = placesData;
 
-        var locateBtn = new Locate({
-            view: sceneView
+        var map = new Map({
+            basemap: "streets",
+            ground: "world-elevation"
         });
 
-        sceneView.ui.add(locateBtn, {
-            position: "top-left"
+        var sceneView = new SceneView({
+            container: "mapDiv",
+            map: map,
+            scale: 50000000
         });
 
-    }
+        addLocationButton();
+        locatePlacesAndAddToMap(places);
 
-    function locatePlacesAndAddToMap(places) {
+
+        function addLocationButton() {
+
+            var locateBtn = new Locate({
+                view: sceneView
+            });
+
+            sceneView.ui.add(locateBtn, {
+                position: "top-left"
+            });
+
+        }
+
+        function locatePlacesAndAddToMap(places) {
 
 
-        // Add graphics layer
-        var graphicsLayer = new GraphicsLayer();
-        map.add(graphicsLayer)
+            // Add graphics layer
+            var graphicsLayer = new GraphicsLayer();
+            map.add(graphicsLayer)
 
-        // Initialize a symbol
-        var markerSymbol = new SimpleMarkerSymbol({
-            style: "circle",
-            color: "blue",
-            outline: {
-                color: [255, 255, 225],
-                width: 3
+            // Initialize a symbol
+            var markerSymbol = new SimpleMarkerSymbol({
+                style: "circle",
+                color: "blue",
+                outline: {
+                    color: [255, 255, 225],
+                    width: 3
+                }
+            });
+
+            // Create a locator task using the world geocoding service
+            var locatorTask = new Locator({
+                url: LOCATOR_TASK
+            });
+
+            var addresses = []
+
+            // Add places to map
+            for (var i = 0; i < places.length; i++) {
+
+                var address = {
+                    "OBJECTID": i,
+                    "singleLine": places[i]
+                };
+                addresses.push(address)
             }
-        });
 
-        // Create a locator task using the world geocoding service
-        var locatorTask = new Locator({
-            url: "https://utility.arcgis.com/usrsvcs/appservices/mEg43zDsRI275tGc/rest/services/World/GeocodeServer"
-        });
+            var params = {
+                addresses: addresses
+            }
 
-        var addresses = []
+            locatorTask.addressesToLocations(params).then(function (locations) {
 
-        // Add places to map
-        for (var i = 0; i < places.length; i++) {
+                var places = [];
 
-            var address = {
-                "OBJECTID": i,
-                "singleLine": places[i]
-            };
-            addresses.push(address)
-        }
+                console.log(locations);
 
-        var params = {
-            addresses: addresses
-        }
+                locations.forEach(function (loc) {
 
-        locatorTask.addressesToLocations(params).then(function (locations) {
+                    console.log(loc);
 
-            var places = [];
+                    var placePoint = new Point({
+                        x: loc.location.x,
+                        y: loc.location.y,
+                        z: 1010
+                    });
 
-            console.log(locations);
+                    var place = {
+                        name: loc.attributes.LongLabel,
+                        x: loc.location.x,
+                        y: loc.location.y,
+                        subregion: loc.attributes.Subregion,
+                        placePoint: placePoint,
+                        country:loc.attributes.Country
+                    };
 
-            locations.forEach(function (loc) {
-
-                console.log(loc);
-
-                var placePoint = new Point({
-                    x: loc.location.x,
-                    y: loc.location.y,
-                    z: 1010
+                    places.push(place)
                 });
 
-                var place = {
-                    name: loc.attributes.LongLabel,
-                    x: loc.location.x,
-                    y: loc.location.y,
-                    subregion: loc.attributes.Subregion,
-                    placePoint:placePoint
 
-                }
-                places.push(place)
-            });
+                addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
+                addListOfPlaces(places);
 
 
-            addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol);
-            addListOfPlaces(places);
-
-
-        }).otherwise(function (err) {
-            console.log(response)
-        })
-    }
-
-
-    function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol) {
-
-
-        var minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
-
-        // Add places to map
-        for (var i = 0; i < places.length; i++) {
-
-            var place = places[i];
-
-
-            var xCord = Math.round(place.x)
-            var yCord = Math.round(place.y)
-
-            if (minX > xCord) {
-                minX = xCord
-            }
-
-            if (maxX < xCord) {
-                maxX = xCord
-                console.log(xCord)
-            }
-
-            if (minY > yCord) {
-                minY = yCord
-
-            }
-
-            if (maxY < yCord) {
-                maxY = yCord
-            }
-
-
-            var pointGraphic = new Graphic({
-                geometry: place.placePoint,
-                symbol: markerSymbol,
-                attribute: {
-                    "name": place.name
-                }
-            });
-            console.log(place.name);
-
-            pointGraphic.popupTemplate = {
-                title: place.name,
-                content: "{name}",
-                fieldInfos: [{
-                    fieldName: "name",
-                    format: {
-                        digitSeparator: true,
-                        places: 0
-                    }
-                }]
-            };
-
-            graphicsLayer.add(pointGraphic)
+            }).otherwise(function (err) {
+                console.log(response)
+            })
         }
 
-        console.log(minX, minY, maxX, maxY);
 
-        var placesExtent = new Extent({
-            xmin: minX,
-            ymin: minY,
-            xmax: maxX,
-            ymax: maxY
-        });
+        function addPlacesToMap(places, graphicsLayer, sceneView, markerSymbol) {
 
-        var mapPadding = 50;
 
-        sceneView.padding = {
-            top: mapPadding,
-            left: mapPadding,
-            right: mapPadding,
-            bottom: mapPadding
-        };
+            var minX = Number.MAX_VALUE, minY = Number.MAX_VALUE, maxX = -Number.MAX_VALUE, maxY = -Number.MAX_VALUE;
 
-        sceneView.then(function () {
-            sceneView.goTo(placesExtent);
+            // Add places to map
+            for (var i = 0; i < places.length; i++) {
 
-        })
+                var place = places[i];
 
-    }
 
-    function addListOfPlaces(places) {
+                var xCord = Math.round(place.x)
+                var yCord = Math.round(place.y)
 
-        var domElement = "<ul id=\"places_list\">";
+                if (minX > xCord) {
+                    minX = xCord
+                }
 
-        places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
-        console.log("Places, ", places);
+                if (maxX < xCord) {
+                    maxX = xCord
+                    console.log(xCord)
+                }
 
-        var i = 0;
-        places.forEach(function (place) {
+                if (minY > yCord) {
+                    minY = yCord
 
-            var placesId = "places_" + i;
-            domElement += "<li id=\"" + placesId + "\">&bull; " + place.name + "</li>";
-            i++;
-        });
-        domElement += "</ul>"
+                }
 
-        console.log(domElement);
+                if (maxY < yCord) {
+                    maxY = yCord
+                }
 
-        var listView = domConstruct.toDom(domElement);
 
-        sceneView.ui.add(listView, {
-            position: "bottom-right"
-        });
+                var pointGraphic = new Graphic({
+                    geometry: place.placePoint,
+                    symbol: markerSymbol,
+                    attribute: {
+                        "name": place.name
+                    }
+                });
+                console.log(place.name);
 
-        var k = 0;
-        places.forEach(function (place) {
+                pointGraphic.popupTemplate = {
+                    title: place.name,
+                    content: getGeoEnrichmentData(place)
+                };
 
-            on(dom.byId("places_" + k), "click", function (evt) {
+                graphicsLayer.add(pointGraphic)
+            }
 
-                var place = places[evt.currentTarget.id.split('_')[1]];
-                console.log(place.name.split(',')[0]);
+            console.log(minX, minY, maxX, maxY);
 
-                chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
-                     chrome.tabs.sendMessage(tabs[0].id, {
-                         action : "searchForWord",
-                         source : (place.name.split(',')[0])
-                     }, function(response) {}); 
-                 });
-
-                sceneView.goTo(place.placePoint);
+            var placesExtent = new Extent({
+                xmin: minX,
+                ymin: minY,
+                xmax: maxX,
+                ymax: maxY
             });
-            k++;
-        });
-    }
-});
+
+            var mapPadding = 50;
+
+            sceneView.padding = {
+                top: mapPadding,
+                left: mapPadding,
+                right: mapPadding,
+                bottom: mapPadding
+            };
+
+            sceneView.then(function () {
+                sceneView.goTo(placesExtent);
+
+            })
+
+        }
+
+        function addListOfPlaces(places) {
+
+            var domElement = "<ul id=\"places_list\">";
+
+            var i = 0;
+            places.forEach(function (place) {
+
+                var placesId = "places_" + i;
+                domElement += "<li id=\"" + placesId + "\">" + place.name + "</li>";
+                i++;
+            });
+            domElement += "</ul>";
+
+            var listView = domConstruct.toDom(domElement);
+
+            sceneView.ui.add(listView, {
+                position: "bottom-right"
+            });
+
+            var k = 0;
+            places.forEach(function (place) {
+
+                on(dom.byId("places_" + k), "click", function (evt) {
+
+                    places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
+
+                    console.log("Places, ", places);
+
+                    var i = 0;
+                    places.forEach(function (place) {
+
+                        var placesId = "places_" + i;
+                        domElement += "<li id=\"" + placesId + "\">&bull; " + place.name + "</li>";
+                        i++;
+                    });
+                    domElement += "</ul>"
+                    sceneView.goTo(place.placePoint);
+                });
+                k++;
+            });
+        }
+
+        function getGeoEnrichmentData(place) {
+
+            if(place == null || place.country !='USA'){
+                return '';
+            }
+
+            var studyAreas = [];
+
+            var studyArea = {
+                geometry: {
+                    x:place.x,
+                    y:place.y
+                },
+                areaType:"StandardGeography",
+                intersectingGeographies:[
+                    {"sourceCountry":"US","layer":"US.Places"},
+                    {"sourceCountry":"US","layer":"US.States"},
+                ]
+            };
+
+            studyAreas.push(studyArea);
+
+            var studyAreasJson = JSON.stringify(studyAreas);
+            console.log(studyAreasJson);
+
+            dojo.config.xRequestedWith = "";
+
+            var queryObject = {
+                studyAreas: studyAreasJson,
+                token: TEMP_TOKEN,
+                f: 'pjson'
+            };
+
+            return request(GEO_ENRICHMENT_URL, {
+                query: queryObject, headers: {
+                    "X-Requested-With": null
+                }
+            }).then(function (data) {
+
+                var totalPopulation =''
+                try {
+                    var parsedData = JSON.parse(data);
+                    console.log(parsedData);
+                    var attributes = parsedData.results[0].value.FeatureSet[0].features[0].attributes;
+                    totalPopulation = attributes.TOTPOP + " people live in " + attributes.StdGeographyName;
+                }
+                catch(err) {
+                    console.log(err.message);
+                }
+                return  totalPopulation;
+
+            }, function (err) {
+                console.log(err);
+                return '';
+
+            }, function (evt) {
+                return '';
+            });
+
+        }
+
+
+    });
 }
 
-function getPlacesData(resultingArray)
-{
-    return ['Texas', 'New York', 'Redlands', 'Alabama'];
-    //return resultingArray;
+function getPlacesData() {
+    return ['Calfornia', 'New York', 'Redlands', 'Atlanta', 'Hawai'];
 }
-
-// window.onload = renderEsriMap;
+//renderEsriMap(getPlacesData());
