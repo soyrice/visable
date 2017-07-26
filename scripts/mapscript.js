@@ -215,6 +215,8 @@ function renderEsriMap(placesData) {
 
         function addListOfPlaces(places) {
 
+            places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
+
             var domElement = "<ul id=\"places_list\">";
 
             var i = 0;
@@ -236,19 +238,17 @@ function renderEsriMap(placesData) {
             places.forEach(function (place) {
 
                 on(dom.byId("places_" + k), "click", function (evt) {
+                    
+                    var place = places[evt.currentTarget.id.split('_')[1]];
+                    console.log(place.name.split(',')[0]);
 
-                    places.sort(function(a, b) {return a.name.localeCompare(b.name);} );
-
-                    console.log("Places, ", places);
-
-                    var i = 0;
-                    places.forEach(function (place) {
-
-                        var placesId = "places_" + i;
-                        domElement += "<li id=\"" + placesId + "\">&bull; " + place.name + "</li>";
-                        i++;
-                    });
-                    domElement += "</ul>"
+                    chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
+                         chrome.tabs.sendMessage(tabs[0].id, {
+                             action : "searchForWord",
+                             source : (place.name.split(',')[0])
+                         }, function(response) {}); 
+                     });
+                    
                     sceneView.goTo(place.placePoint);
                 });
                 k++;
@@ -299,7 +299,7 @@ function renderEsriMap(placesData) {
                     var parsedData = JSON.parse(data);
                     console.log(parsedData);
                     var attributes = parsedData.results[0].value.FeatureSet[0].features[0].attributes;
-                    totalPopulation = attributes.TOTPOP + " people live in " + attributes.StdGeographyName;
+                    totalPopulation = attributes.TOTPOP.toLocaleString() + " people live in " + attributes.StdGeographyName;
                 }
                 catch(err) {
                     console.log(err.message);

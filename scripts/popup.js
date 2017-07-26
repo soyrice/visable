@@ -98,7 +98,7 @@ function cleanOutput(response)
     mostFrequentCount = 0;
 	for (var i = 0; i < responseJSON.length; i++)
 	{
-		if (responseJSON[i].Name.length > 2) 
+		if (responseJSON[i].Name.length > 2)
         {
 			cleanArray.push(responseJSON[i].Name);
 
@@ -112,6 +112,7 @@ function cleanOutput(response)
         // }
 	}
 
+    console.log("Clean array: ", cleanArray);
     changeMapInterfaceElements();
 
     // Add country codes
