@@ -57,7 +57,7 @@ function onPopupLoad()
 
 			$.ajax(
 			{
-			  url         : "https://75eba785.ngrok.io/jsonItems",
+			  url         : "https://7c27de3a.ngrok.io/jsonItems",
 			  type        : "POST",
 			  data        : JSON.stringify({"Text" : pageContent}),
 			  contentType : 'application/json',
@@ -93,7 +93,7 @@ function cleanOutput(response)
 {
 	responseJSON = JSON.parse(response);
 	cleanArray   = [];
-    countryCodes = [];
+    // countryCodes = [];
 
     mostFrequentCount = 0;
 	for (var i = 0; i < responseJSON.length; i++)
@@ -107,9 +107,9 @@ function cleanOutput(response)
                 mostFrequent = responseJSON[i].Name;
             }
         }
-        else {
-            countryCodes.push(responseJSON[i].Name);
-        }
+        // else {
+        //     countryCodes.push(responseJSON[i].Name);
+        // }
 	}
 
     changeMapInterfaceElements();
