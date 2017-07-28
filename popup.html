@@ -1,56 +1,47 @@
+<!-- Filename: popup.html                    -->
+<!-- Date:     July 2017                     -->
+<!-- Authors:  Evgeni Dobranov & Thomas Binu -->
+<!-- Purpose:  Defines extension interface   -->
+
 <html>
 	
 	<head>
 		
-		<!-- <meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" /> -->
+		<!-- Security Policy Header -->
 		<meta http-equiv="Content-Security-Policy" content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
 
-		<!-- Stylesheets -->
+		<!-- Stylesheets (CSS) -->
 		<link rel="stylesheet" href="css/styles.css">
 		<link href="css/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="css/fontawesome/css/font-awesome.min.css">
 		
-		<!-- Fonts -->
-		<link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
+		<!-- Google Fonts -->
 		<link href="https://fonts.googleapis.com/css?family=Rubik" rel="stylesheet">
 		
-		<!-- JS Scripts -->
-		<script src="popup.js"></script>
-		<script src="jquery-3.2.1.min.js"></script>
+		<!-- Proprietary Scripts (JS) -->
+		<script src="js/popup.js"></script>
+        <script src="js/mapscript.js"></script>
+
+        <!-- 3rd Party Scripts (JS) -->
+		<script src="js/jquery/jquery-3.2.1.min.js"></script>
+        <script src="js/compromise/compromise.min.js"></script>
 
 		<!-- Earth 3D -->
 		<script type='text/javascript' src='js/d3/d3.v3.min.js'></script>
   		<script type='text/javascript' src='js/topojson/topojson.v1.min.js'></script>
-  		<script type='text/javascript' src='js/planetaryjs.min.js'></script>
+  		<script type='text/javascript' src='js/planetary/planetaryjs.min.js'></script>
 
-  		<!-- Quicksearch -->
-		<script type='text/javascript' src='js/quicksearch/jquery.quicksearch.js'></script> 
-
-		<!-- Esri -->
+		<!-- Esri API -->
 		<link rel="stylesheet" href="https://js.arcgis.com/4.4/esri/css/main.css"> 
-		<!-- <link rel="stylesheet" href="css/main.css"> -->
 		<script src="https://js.arcgis.com/4.4/"></script>
-		<!-- <script src="js/init.js"></script> -->
-    	<script src="mapscript.js"></script>
 
-    	<!-- <script src="js/require.js"></script> -->
 	</head>
 
 	<body>
 		<div class="container">
     		<div id="row1" class="row">
-    			<!--<iframe src="http://www.arcgis.com/home/webmap/viewer.html?useExisting=1" width="100%" height="100%" frameborder="0"></iframe> -->
     			<div class="col-m text-center">
-    				<!--
-    				<button onclick="parsePage" type="button" class="btn btn-primary btn-circle btn-xl"><i class="fa fa-globe fa-lg" aria-hidden="true"></i></button>
-    				<button type="button" class="btn btn-primary btn-lg">Extract HTML!</button>
-    				<input id="searcher" type="text" name="searcher">
-    				<br><br> 
-    				-->
-    				
-    				<!--
-    				<div id="pending">Extracting relevant locations data...<br><i class='fa fa-cog fa-spin fa-3x' aria-hidden='true'></i></div>
-    				-->
+    				<!-- <i class='fa fa-cog fa-spin fa-3x' aria-hidden='true'></i>	-->
 
     				<div id="pending">Collecting relevant location data</div><br><br><canvas id='rotatingGlobe' width='400' height='400' style='width: 400px; height: 400px; cursor: move;'></canvas>
                 </div>
@@ -60,6 +51,7 @@
                 <div id="topBuffer">
                     <div id="myButton" class="col-xs-6 text-center">
                         <button type="button" class="btn btn-primary btn-lg">Explore Most Relevant Place</button>
+                        <i id="closeButton" class="fa fa-times-circle fa-3x" aria-hidden="true"></i>
                         <br>
                     </div>
                 </div>
@@ -70,11 +62,7 @@
             </div>
         </div>
 			
-			<!--<div id="result"></div>-->
             <div id="mapDiv"></div>
-            <div id="myPage"></div>
-
-		
+            <div id="esriOnline"></div>
 	</body>
-
 </html>
