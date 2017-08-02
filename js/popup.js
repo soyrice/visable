@@ -110,13 +110,8 @@ function changeMapInterfaceElements()
 	$(".btn").on("click", function(event)
 	 {
 		 event.preventDefault();
-		 $("#closeButton").show();
-		 
-		 $(".btn").hide();
-		 $("#mapDiv").hide();
-
-		 $("#esriOnline").text("");
-		 $("#esriOnline").append("<iframe src='http://www.arcgis.com/home/search.html?q=" + mostFrequent + "&t=content&start=1&sortOrder=desc&sortField=relevance' width='100%'' height='100%'' frameborder='0'></iframe>");
+		 chrome.tabs.create({"http://www.arcgis.com/home/search.html?q=" + mostFrequent + 
+				     "&t=content&start=1&sortOrder=desc&sortField=relevance"});
 	 });
 }
 
